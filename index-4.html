@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZURE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#000000;
+    --near-black:#0a0a0a;
+    --panel:#121212;
+    --line:#2a2a2a;
+    --white:#ffffff;
+    --off-white:#e8e8e8;
+    --gray:#7a7a7a;
+    --gray-dim:#4a4a4a;
+    --accent:#e2231a;
+  }
+
+  /* ---------- BLOCKY AVATAR (roblox-inspired, css-drawn) ---------- */
+  .avatar-figure{
+    position:absolute;
+    right:6%;
+    bottom:8%;
+    width:130px;
+    height:210px;
+    z-index:2;
+  }
+  .avatar-head{
+    position:absolute;
+    top:0;left:38px;
+    width:54px;height:48px;
+    background:var(--white);
+    border-radius:6px;
+  }
+  .avatar-torso{
+    position:absolute;
+    top:52px;left:24px;
+    width:82px;height:74px;
+    background:var(--off-white);
+    border-radius:8px;
+  }
+  .avatar-belt{
+    position:absolute;
+    top:100px;left:24px;
+    width:82px;height:10px;
+    background:var(--accent);
+  }
+  .avatar-arm{
+    position:absolute;
+    top:56px;
+    width:22px;height:74px;
+    background:var(--gray);
+    border-radius:6px;
+  }
+  .avatar-arm.left{left:2px;}
+  .avatar-arm.right{right:2px;}
+  .avatar-leg{
+    position:absolute;
+    top:130px;
+    width:28px;height:80px;
+    background:var(--gray-dim);
+    border-radius:6px;
+  }
+  .avatar-leg.left{left:32px;}
+  .avatar-leg.right{right:32px;}
+  @media (max-width:860px){
+    .avatar-figure{
+      transform:scale(0.6);
+      transform-origin:bottom right;
+      right:2%;
+      bottom:2%;
+      opacity:0.9;
+    }
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--black);
+    color:var(--off-white);
+    font-family:'Inter',sans-serif;
+    font-weight:400;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+
+  ::selection{background:var(--white);color:var(--black);}
+
+  a{color:inherit;text-decoration:none;}
+
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  /* ---------- HUD grid coords (signature element) ---------- */
+  .coord{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    color:var(--gray-dim);
+    text-transform:uppercase;
+  }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:100;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1180px;
+    margin:0 auto;
+    padding:20px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    letter-spacing:0.06em;
+  }
+  .logo span{color:var(--gray);}
+  nav ul{
+    display:flex;
+    gap:36px;
+    list-style:none;
+  }
+  nav a{
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    transition:color 0.25s ease;
+    position:relative;
+  }
+  nav a:hover{color:var(--white);}
+  .nav-buy{
+    border:1px solid var(--white);
+    padding:9px 18px;
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--white) !important;
+    transition:background 0.25s ease, color 0.25s ease;
+  }
+  .nav-buy:hover{background:var(--white);color:var(--black) !important;}
+  .nav-toggle{display:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    padding-top:80px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid{
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:0.35;
+    mask-image:linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  }
+  .hero-content{position:relative;z-index:2;}
+  .hero-eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:28px;
+  }
+  .dot{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--accent);
+    animation:pulse 2s infinite ease-in-out;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.25;}
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(64px, 13vw, 160px);
+    line-height:0.9;
+    letter-spacing:-0.02em;
+    color:var(--white);
+  }
+  .hero h1 .outline{
+    -webkit-text-stroke:1.5px var(--white);
+    color:transparent;
+  }
+  .hero-sub{
+    max-width:520px;
+    margin-top:28px;
+    font-size:17px;
+    color:var(--gray);
+  }
+  .hero-actions{
+    margin-top:44px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:15px 28px;
+    font-size:13px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    font-weight:500;
+    transition:all 0.25s ease;
+    border:1px solid var(--white);
+  }
+  .btn-solid{
+    background:var(--white);
+    color:var(--black);
+  }
+  .btn-solid:hover{background:transparent;color:var(--white);}
+  .btn-ghost{
+    color:var(--white);
+  }
+  .btn-ghost:hover{background:var(--white);color:var(--black);}
+
+  .hero-footer{
+    position:relative;
+    z-index:2;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-top:80px;
+    padding-bottom:36px;
+  }
+  .scroll-cue{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--gray);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+  }
+  .scroll-line{
+    width:1px;height:36px;
+    background:var(--gray-dim);
+    position:relative;
+    overflow:hidden;
+  }
+  .scroll-line::after{
+    content:'';
+    position:absolute;
+    top:-100%;left:0;
+    width:100%;height:100%;
+    background:var(--white);
+    animation:scrollDown 1.8s infinite ease-in-out;
+  }
+  @keyframes scrollDown{
+    0%{top:-100%;}
+    60%{top:100%;}
+    100%{top:100%;}
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{
+    padding:120px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:64px;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .section-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(32px,4vw,48px);
+    color:var(--white);
+    letter-spacing:-0.01em;
+  }
+  .section-num{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--gray-dim);
+    font-size:13px;
+  }
+
+  /* ---------- SHOWCASE ---------- */
+  .showcase-frame{
+    position:relative;
+    border:1px solid var(--line);
+    background:var(--near-black);
+    aspect-ratio:16/9;
+    overflow:hidden;
+  }
+  .showcase-frame::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;
+    height:34px;
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    z-index:2;
+  }
+  .showcase-frame::after{
+    content:'REC · SHOWCASE.MP4';
+    position:absolute;
+    top:9px;left:16px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--gray);
+    z-index:3;
+  }
+  .showcase-frame iframe{
+    position:absolute;
+    top:34px;left:0;
+    width:100%;
+    height:calc(100% - 34px);
+    border:0;
+  }
+  .showcase-caption{
+    display:flex;
+    justify-content:space-between;
+    margin-top:18px;
+    color:var(--gray);
+    font-size:13px;
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about-layout{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:80px;
+  }
+  .about-lead{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(24px,2.6vw,32px);
+    font-weight:500;
+    color:var(--white);
+    line-height:1.35;
+  }
+  .about-body p{
+    color:var(--gray);
+    margin-bottom:20px;
+    font-size:15px;
+    max-width:520px;
+  }
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+    margin-top:48px;
+    border-top:1px solid var(--line);
+    padding-top:32px;
+  }
+  .stat-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:28px;
+    color:var(--white);
+    font-weight:700;
+  }
+  .stat-label{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    margin-top:6px;
+  }
+
+  /* ---------- TOOLS / PRICING ---------- */
+  .tools-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .tool-card{
+    background:var(--black);
+    padding:36px 30px;
+    display:flex;
+    flex-direction:column;
+    min-height:340px;
+    position:relative;
+    transition:background 0.3s ease;
+  }
+  .tool-card:hover{background:var(--near-black);}
+  .tool-card.featured{background:var(--white);color:var(--black);}
+  .tool-card.featured:hover{background:var(--off-white);}
+  .tool-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gray);
+    margin-bottom:20px;
+  }
+  .tool-card.featured .tool-tag{color:var(--gray-dim);}
+  .tool-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:22px;
+    font-weight:600;
+    color:var(--white);
+    margin-bottom:12px;
+  }
+  .tool-card.featured .tool-name{color:var(--black);}
+  .tool-desc{
+    font-size:14px;
+    color:var(--gray);
+    flex-grow:1;
+    margin-bottom:24px;
+  }
+  .tool-card.featured .tool-desc{color:#333;}
+  .tool-price{
+    font-family:'JetBrains Mono',monospace;
+    font-size:26px;
+    font-weight:700;
+    color:var(--white);
+    margin-bottom:20px;
+  }
+  .tool-card.featured .tool-price{color:var(--black);}
+  .tool-price sup{font-size:13px;color:var(--gray);font-weight:500;}
+  .price-list{
+    margin-bottom:24px;
+  }
+  .price-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .tool-card.featured .price-line{border-bottom:1px solid #d8d8d8;}
+  .price-line:last-child{border-bottom:none;}
+  .price-amount{
+    font-size:20px;
+    font-weight:700;
+    color:var(--white);
+  }
+  .tool-card.featured .price-amount{color:var(--black);}
+  .price-label{
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    font-family:'Inter',sans-serif;
+  }
+  .tool-card.featured .price-label{color:#555;}
+  .price-line.robux .price-amount{color:var(--accent);}
+  .tool-buy{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:13px;
+    border:1px solid var(--white);
+    color:var(--white);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    transition:all 0.25s ease;
+  }
+  .tool-buy:hover{background:var(--white);color:var(--black);}
+  .tool-card.featured .tool-buy{
+    border:1px solid var(--black);
+    color:var(--black);
+  }
+  .tool-card.featured .tool-buy:hover{background:var(--black);color:var(--white);}
+
+  /* ---------- REVIEWS ---------- */
+  .reviews-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .review-card{
+    background:var(--black);
+    padding:30px 28px;
+    display:flex;
+    flex-direction:column;
+  }
+  .review-stars{
+    font-family:'JetBrains Mono',monospace;
+    font-size:14px;
+    letter-spacing:0.08em;
+    color:var(--white);
+    margin-bottom:16px;
+  }
+  .review-stars .dim{color:var(--gray-dim);}
+  .review-text{
+    font-size:15px;
+    color:var(--off-white);
+    line-height:1.5;
+    flex-grow:1;
+    margin-bottom:20px;
+  }
+  .review-author{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
+
+  /* ---------- CTA / FOOTER ---------- */
+  .cta{
+    text-align:center;
+    padding:140px 0;
+  }
+  .cta h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(36px,6vw,72px);
+    color:var(--white);
+    letter-spacing:-0.01em;
+    margin-bottom:24px;
+  }
+  .cta p{color:var(--gray);margin-bottom:40px;}
+  .cta .btn{padding:18px 40px;}
+
+  footer{
+    padding:40px 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  footer .logo{font-size:15px;}
+  .footer-links{
+    display:flex;
+    gap:28px;
+  }
+  .footer-links a{
+    font-size:13px;
+    color:var(--gray);
+  }
+  .footer-links a:hover{color:var(--white);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:860px){
+    nav ul{display:none;}
+    .about-layout{grid-template-columns:1fr;gap:48px;}
+    .tools-grid{grid-template-columns:1fr;}
+    .stat-row{grid-template-columns:1fr;gap:20px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;scroll-behavior:auto !important;}
+  }
+
+  :focus-visible{
+    outline:2px solid var(--white);
+    outline-offset:3px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <div class="logo">AZURE<span>.</span></div>
+    <ul>
+      <li><a href="#showcase">Showcase</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+    </ul>
+    <a href="#tools" class="nav-buy">Buy Now</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="avatar-figure">
+    <div class="avatar-head"></div>
+    <div class="avatar-torso"></div>
+    <div class="avatar-belt"></div>
+    <div class="avatar-arm left"></div>
+    <div class="avatar-arm right"></div>
+    <div class="avatar-leg left"></div>
+    <div class="avatar-leg right"></div>
+  </div>
+  <div class="wrap hero-content">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      <span class="coord">STATUS: ACTIVE — ACCEPTING ORDERS</span>
+    </div>
+    <h1>AZURE<span class="outline">.</span></h1>
+    <p class="hero-sub">A collection of precision-built tools. Made to work quietly, perform reliably, and get out of your way.</p>
+    <div class="hero-actions">
+      <a href="#tools" class="btn btn-solid">View Tools</a>
+      <a href="#showcase" class="btn btn-ghost">Watch Showcase</a>
+    </div>
+  </div>
+  <div class="wrap hero-footer">
+    <span class="coord">AZURE / 2026</span>
+    <div class="scroll-cue">
+      <span>Scroll</span>
+      <span class="scroll-line"></span>
+    </div>
+  </div>
+</section>
+
+<section id="showcase">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Showcase</h2>
+      <span class="section-num mono">SEE IT RUN</span>
+    </div>
+    <div class="showcase-frame">
+      <iframe src="https://www.youtube.com/embed/XriPVvJby7g" title="the godguybyparer showcase" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="showcase-caption">
+      <span>the 2fa Bypasser — full walkthrough</span>
+      <span class="mono">01 / 02</span>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:64px;">
+    <div class="showcase-frame">
+      <iframe src="https://www.youtube.com/embed/89ZJzxsm9N8" title="RatmanGo showcase" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="showcase-caption">
+      <span>RAT BUILDER — full walkthrough</span>
+      <span class="mono">02 / 02</span>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">About</h2>
+      <span class="section-num mono">WHO'S BEHIND IT</span>
+    </div>
+    <div class="about-layout">
+      <p class="about-lead">AZURE is a developer who Built  a real Working 2fa bypasser for robloxandaRATbuilder.The 2fa bypasser Helps you get into lost or hacked accounts or Helps Beam people
+      .</p>
+      <div class="about-body">
+        <p>Every tool here is tested by hand before it's listed. No bloated feature lists, no fake reviews — just software that does what it says, updated when it needs to be, and backed by direct support.</p>
+        <p>Everything is sold and supported through Discord, so you're always talking to a real person, not a support ticket queue.</p>
+        <div class="stat-row">
+          <div>
+            <div class="stat-num">100+</div>
+            <div class="stat-label">Customers</div>
+          </div>
+          <div>
+            <div class="stat-num">24/7</div>
+            <div class="stat-label">Support</div>
+          </div>
+          <div>
+            <div class="stat-num">v3</div>
+            <div class="stat-label">Current Build</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Tools</h2>
+      <span class="section-num mono">PICK YOURS · PAY IN DISCORD</span>
+    </div>
+    <div class="tools-grid" style="grid-template-columns:repeat(2,1fr);">
+
+      <div class="tool-card featured">
+        <span class="tool-tag">01 · the 2FA BYPASSER </span>
+        <div class="tool-name">the 2FA BYPASSER</div>
+        <p class="tool-desc">The 2fa bypasser allows you to change the email or get back into a roblox account that washacked. It bypasser the email verication and Cracks 6 digit codes under 1 minute.</p>
+        <div class="price-list">
+          <div class="price-line"><span class="price-amount">$20</span><span class="price-label">/ month · crypto</span></div>
+          <div class="price-line"><span class="price-amount">$40</span><span class="price-label">/ lifetime</span></div>
+          <div class="price-line robux"><span class="price-amount">4K</span><span class="price-label">robux / month</span></div>
+          <div class="price-line robux"><span class="price-amount">8K</span><span class="price-label">robux · lifetime</span></div>
+        </div>
+        <a href="https://discord.gg/4y5a4at53k" class="tool-buy" target="_blank" rel="noopener">Buy on Discord</a>
+      </div>
+
+      <div class="tool-card">
+        <span class="tool-tag">02 · RAT Builder</span>
+        <div class="tool-name">Rat Builder by azure</div>
+        <p class="tool-desc">This Rat Builder Is just a ordinary shitty Builder that you find on github Its A premium Builder Its undetected by Almost all platforms including discord,telegram etc it Has 200+ features it allows you to control the victims PC like its yours and you can steal info or troll or torment them with the 200+ commands .</p>
+        <div class="price-list">
+          <div class="price-line"><span class="price-amount">$20</span><span class="price-label">/ month · crypto</span></div>
+          <div class="price-line"><span class="price-amount">$40</span><span class="price-label">/ lifetime</span></div>
+          <div class="price-line robux"><span class="price-amount">4K</span><span class="price-label">robux / month</span></div>
+          <div class="price-line robux"><span class="price-amount">8K</span><span class="price-label">robux · lifetime</span></div>
+        </div>
+        <a href="https://discord.gg/4y5a4at53k" class="tool-buy" target="_blank" rel="noopener">Buy on Discord</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Reviews</h2>
+      <span class="section-num mono">FROM REAL CUSTOMERS</span>
+    </div>
+    <div class="reviews-grid">
+
+      <div class="review-card">
+        <div class="review-stars">★★★★<span class="dim">½</span></div>
+        <p class="review-text">Great and fast service.</p>
+        <div class="review-author">— Daniel</div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">The tool worked perfectly.</p>
+        <div class="review-author">— Angela</div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★<span class="dim">☆</span></div>
+        <p class="review-text">Service was slightly slow but the tool was good.</p>
+        <div class="review-author">— Gokuman</div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">The owner cut me a break when I was short on cash — thank you so much The bypassef and rat builder works great i bought both.</p>
+        <div class="review-author">— Zealandar</div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★<span class="dim">☆</span></div>
+        <p class="review-text">He was kind and his tool is legit the bypasser is awesome.</p>
+        <div class="review-author">— Leah</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="cta" style="border-bottom:none;">
+  <div class="wrap">
+    <h2>Ready when<br>you are.</h2>
+    <p>Join the Discord to ask questions, see proof, or purchase directly.</p>
+    <a href="https://discord.gg/4y5a4at53k" class="btn btn-solid" target="_blank" rel="noopener">Join Discord</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;">
+    <div class="logo">AZURE<span>.</span></div>
+    <div class="footer-links">
+      <a href="https://discord.gg/4y5a4at53k" target="_blank" rel="noopener">Discord</a>
+      <a href="#tools">Tools</a>
+      <a href="#about">About</a>
+    </div>
+    <span class="coord">© 2026 AZURE</span>
+  </div>
+</footer>
+
+</body>
+</html>
